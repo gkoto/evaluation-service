@@ -28,6 +28,8 @@ type App struct {
 }
 
 func main() {
+	shutdownTelemetry := initTelemetry("evaluation-service")
+	defer shutdownTelemetry()
 	_ = godotenv.Load() // Carrega .env para dev local
 
 	// --- Configuração ---
@@ -106,7 +108,7 @@ func main() {
 	mux.HandleFunc("/evaluate", app.evaluationHandler)
 
 	log.Printf("Serviço de Avaliação (Go) rodando na porta %s", port)
-	if err := http.ListenAndServe(":"+port, mux); err != nil {
+	if err := http.ListenAndServe(":"+port, otelMiddleware(mux)); err != nil {
 		log.Fatal(err)
 	}
 }
